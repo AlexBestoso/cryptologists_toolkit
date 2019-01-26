@@ -361,6 +361,9 @@ int affine_crack(char *argv[]){
 		afes.coprime = bestMultiInvers(TABLESIZE-1, afes.coprime);
 
 		while(done != 0){
+			if(round > totalRounds){
+				return -1;
+			}
 			printf("\n\tround %d of %d\n", round, totalRounds);
 			printf("\tkeys: coprime inverse(%d) | offset(%d)\n", afes.coprime, afes.offset);
 
