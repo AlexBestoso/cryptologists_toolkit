@@ -1,5 +1,4 @@
 # cryptologists_toolkit
-[fixed - :) ] free(): invalid next size (fast)
 
 Built to help you learn. It's nothing that hasn't already been broken.
 
