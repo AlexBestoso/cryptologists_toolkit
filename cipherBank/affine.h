@@ -258,7 +258,6 @@ int affine_crack(char *argv[]){
 	int done = 1;
 	size_t coeff_count = 0;
 	int EA_ret;
-	int *coeffArray_ptr;
 	int totalRounds, round=0;
 
 	/* Open ciphertext file */
@@ -310,113 +309,103 @@ int affine_crack(char *argv[]){
 	printf("Select Crack Option\n\tBrute Force(1)\n\tLetter Frequency Analysis(not finneshed yet)\n(?)> ");
 	scanf("%d", &option);
 	
-	switch(option){
-		case 0:/* letter frequency*/ 
-			return -1;
-			break;
+	if(option == 0){/* letter frequency*/ 
+		return -1;
 
-		case 1: /* brute force*/	
-			printf("Affine - Table Based Brute Forece Attack\n\n");
+	}else if(option == 1){/* brute force*/	
+		printf("Affine - Table Based Brute Forece Attack\n\n");
 
-			/* get coprime count*/
-			for(int i=0; i<TABLESIZE-1; i++){
-         		        EA_ret = bestEuclideanAlgo(TABLESIZE-1, i);
-                		if(EA_ret == 1)
-					coeff_count++;	
+		/* get coprime count*/
+		for(int i=0; i<TABLESIZE-1; i++){
+         	        EA_ret = bestEuclideanAlgo(TABLESIZE-1, i);
+                	if(EA_ret == 1)
+				coeff_count++;	
+        	}
+
+		/* fill array with all coprime values*/
+
+		if(coeff_count == 0){
+                	return -1;
+                }
+
+		totalRounds = (TABLESIZE-1)*coeff_count;
+		int coeffArray_ptr[coeff_count+1];
+
+		for(int i=0; i<TABLESIZE-1; i++){
+			EA_ret = bestEuclideanAlgo(TABLESIZE-1, i);
+			if(EA_ret == 1 && (incrementI <= coeff_count && incrementI >= 0)){
+				coeffArray_ptr[incrementI] = i;
+				incrementI++;
+			}	
+		}
+			
+		coeffArray_ptr[coeff_count] = '\0';
+			
+		/* print coprimes*/
+		printf("possible coprime values:\n");
+		for(int i=0; i<coeff_count; i++){
+			if((i%5) == 0)
+				printf("\n");
+
+			/* ensure no buffer over/underflows */
+			if(i <= coeff_count && i >= 0)
+				printf("%d ", coeffArray_ptr[i]);
+		}
+			
+		printf("Text file, pre-crack:\n%s\n\n", afes.fileBuffer);		
+	
+		incrementI = 0; /* used to increment through multiplicative inverse*/
+		incrementII = 1; /* used to increment through offsets*/
+		afes.offset = incrementII;
+		afes.coprime = coeffArray_ptr[incrementI];
+		afes.coprime = bestMultiInvers(TABLESIZE-1, afes.coprime);
+
+		while(done != 0){
+			printf("\n\tround %d of %d\n", round, totalRounds);
+			printf("\tkeys: coprime inverse(%d) | offset(%d)\n", afes.coprime, afes.offset);
+
+			/*decipher*/
+			for(int i=0; i<afes.fileSize; i++)
+				afes.stateBuffer[i] = afes.fileBuffer[i];
+
+			for(int i=0; i<afes.fileSize; i++){
+                		afes.p = getAsciiPosition(afes.stateBuffer[i]);
+                		afes.p = bestModu(afes.coprime * (afes.p - afes.offset), (size_t)(TABLESIZE-1));
+                		afes.stateBuffer[i] = getAsciiChar(afes.p);
         		}
 
-			/* fill array with all coprime values*/
+			/*print results and get user feed back*/
+			printf("Result:\n\n%s\n\nIs this correct?\n(1) yes\n(2) no\n(3) exit\n(?)> ", afes.stateBuffer);
+			scanf("%d", &input);
 
-			if(coeff_count == 0){
-                                return -1;
-                        }
+			/*operate relative to input*/
 
-			totalRounds = (TABLESIZE-1)*coeff_count;
-			
-			coeffArray_ptr = malloc(coeff_count+1);
+			if(input == 1){/*yes*/
+				done = 0;
 
-			for(int i=0; i<TABLESIZE-1; i++){
-				EA_ret = bestEuclideanAlgo(TABLESIZE-1, i);
-				if(EA_ret == 1 && (incrementI <= coeff_count && incrementI >= 0)){
-					coeffArray_ptr[incrementI] = i;
-					incrementI++;
-				}	
-			}
-			
-			coeffArray_ptr[coeff_count] = '\0';
-			
-			/* print coprimes*/
-			printf("possible coprime values:\n");
-			for(int i=0; i<coeff_count; i++){
-				if((i%5) == 0)
-					printf("\n");
-
-				/* ensure no buffer over/underflows */
-				if(i <= coeff_count && i >= 0)
-					printf("%d ", coeffArray_ptr[i]);
-			}
-			
-			printf("Text file, pre-crack:\n%s\n\n", afes.fileBuffer);		
-	
-			incrementI = 0; /* used to increment through multiplicative inverse*/
-			incrementII = 1; /* used to increment through offsets*/
-			afes.offset = incrementII;
-			afes.coprime = coeffArray_ptr[incrementI];
-			afes.coprime = bestMultiInvers(TABLESIZE-1, afes.coprime);
-
-			while(done != 0){
-				printf("\n\tround %d of %d\n", round, totalRounds);
-				printf("\tkeys: coprime inverse(%d) | offset(%d)\n", afes.coprime, afes.offset);
-
-				/*decipher*/
-				for(int i=0; i<afes.fileSize; i++)
-					afes.stateBuffer[i] = afes.fileBuffer[i];
-
-				for(int i=0; i<afes.fileSize; i++){
-                			afes.p = getAsciiPosition(afes.stateBuffer[i]);
-                			afes.p = bestModu(afes.coprime * (afes.p - afes.offset), (size_t)(TABLESIZE-1));
-                			afes.stateBuffer[i] = getAsciiChar(afes.p);
-        			}
-
-				/*print results and get user feed back*/
-				printf("Result:\n\n%s\n\nIs this correct?\n(1) yes\n(2) no\n(3) exit\n(?)> ", afes.stateBuffer);
-				scanf("%d", &input);
-
-				/*operate relative to input*/
-
-				if(input == 1){/*yes*/
-					done = 0;
-
-				}else if(input == 3){
-					printf("Exiting...\n");
-                                        done = 0;
-				}else{/*no*/
-					done = 1;
-					incrementII++; /*increment offset*/
-					if(incrementII >= TABLESIZE){/*if offset is out of table range*/
-						incrementII=1;	/*set offset to 1*/
-						incrementI++;	/*increment coprime array position*/
-						if(incrementI >= coeff_count+1){/* if position exceeds amount of coprimes*/
-							printf("Code cracking failed\n");
-							free(coeffArray_ptr);
-							done=0;
-							return -1;
-						}
+			}else if(input == 3){
+				printf("Exiting...\n");
+                        	done = 0;
+			}else{/*no*/
+				done = 1;
+				incrementII++; /*increment offset*/
+				if(incrementII >= TABLESIZE){/*if offset is out of table range*/
+					incrementII=1;	/*set offset to 1*/
+					incrementI++;	/*increment coprime array position*/
+					if(incrementI >= coeff_count+1){/* if position exceeds amount of coprimes*/
+						printf("Code cracking failed\n");
+						done=0;
+						return -1;
 					}
-					afes.offset = incrementII;/*set next offset - linear*/
-					afes.coprime = coeffArray_ptr[incrementI];/*set next coprime - may be the same*/
-					afes.coprime = bestMultiInvers(TABLESIZE-1, afes.coprime);
 				}
-				round++;
+				afes.offset = incrementII;/*set next offset - linear*/
+				afes.coprime = coeffArray_ptr[incrementI];/*set next coprime - may be the same*/
+				afes.coprime = bestMultiInvers(TABLESIZE-1, afes.coprime);
 			}
-
-			free(coeffArray_ptr);
-			
-			break;	
-		default:
-
-			break;
+			round++;
+		}
 	}
+
 	if(input != 1){
 		return -1;
 	}else{
