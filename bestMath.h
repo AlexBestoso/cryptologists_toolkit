@@ -1,20 +1,35 @@
 /*
- * Best is shorthand for bestoso
+ * This Program was created by Alexander J. Bestoso
+ * You, the downloader, can utilize this tool in what
+ * ever way you want, assuming the use is within the
+ * confines of the law. 
  *
- * This header file defines a reliable modular function
- * I was sick of the flawed % and remainder(), so, here
- * you go!
+ * This tool is NOT intended to be used as an elite hacker
+ * weapon.
  *
- * The f(field size) must be unsigned to prevent overflow.
- * To use a negative field size, you must multiply your
- * return value by -1 :)
+ * This tool is NOT intended to be used as a means of 
+ * securitng data of any kind.
  *
- * If f is == 0 then the function will retuen -1 without
- * printing a waring. use this value to detect improper use
+ * This tool IS intended to help advance your cryptology 
+ * skills in a way that's not a direct attack on someones
+ * communications.
  *
- * Built by Alex Bestoso
+ * Abusing this tool for cracking communications or building 
+ * ransomeware will leave you in the hands of law enforcement. 
+ *
+ * Be smart, safe, and have fun!
+ *
+ * Leave this notice in this file else we assume you intend to
+ * break the law.
  */
 
+/* 
+ * calculates the % operation witout using the %
+ * the function is the equivalent of:
+ * n % f
+ *
+ * (n)number % (f)ield Size
+ */
 signed int bestModu(signed int n, size_t f){
 	signed int ret = 0;
 	if(f == 0){
@@ -60,9 +75,19 @@ signed int bestModu(signed int n, size_t f){
 	return ret;
 }
 
+/*
+ * Euclidean Algorimth,*/
 signed int bestEuclideanAlgo(signed int fieldSize, signed int number){
 	signed int ret = 0, comp = 99, tmpI = 0, tmpII;
 	signed int rounds = 0;
+
+	/*
+	 * temperatry, return 0 if either parameters are negative
+	 * yet to be tested for that
+	 */
+	if(fieldSize < 0 || number < 0)
+		return 0;
+
 	if(number > fieldSize){
 		tmpI = number;
 		number = fieldSize;
@@ -107,6 +132,15 @@ signed int bestEuclideanAlgo(signed int fieldSize, signed int number){
 
 signed int bestMultiInvers(signed int fieldSize, signed int number){
 	int ret = 0, tmp=0;
+
+	/*
+         * temperatry, return 0 if either parameters are negative
+         * yet to be tested for that
+         */
+        if(fieldSize < 0 || number < 0)
+                return 0;
+
+
 	for(int i=0; i<fieldSize; i++){
 		ret = i;
 		tmp = bestModu(number * i, fieldSize);
@@ -114,6 +148,7 @@ signed int bestMultiInvers(signed int fieldSize, signed int number){
 			return ret;
 		}
 	}
+
 	ret = -1;
 	return ret;
 }
