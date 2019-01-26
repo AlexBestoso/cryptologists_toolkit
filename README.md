@@ -1,5 +1,5 @@
 # cryptologists_toolkit
-[bug] Code only works in ubuntu vm. I belive the error is because I treat a pointer like it's an array. Will be fixed in the next update
+[bug] Code only works in ubuntu vm. I belive the error is because I treat a pointer like it's an array. Will be fixed in the next update. free(): invalid next size (fast)
 
 Built to help you learn. It's nothing that hasn't already been broken.
 
