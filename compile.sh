@@ -1,1 +1,1 @@
-gcc main.c -o ./crptolo_toolk
+gcc main.c -o cryptoToolKit

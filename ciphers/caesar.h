@@ -42,13 +42,12 @@ struct Caesar_Data{
 
 };
 
-int caesar_encrypt(char *argv[]){	
+int caesar_encrypt(char *ptr_targetFile, char *ptr_destinationFile){	
 	struct Caesar_Data ces; /*caesar encrypt struct*/
 	struct stat st;
 	int security = 0;
-	
-	/* open plaintext file for read */
-	ces.p_fd = open(argv[3], O_RDONLY);
+
+	ces.p_fd = open(ptr_targetFile, O_RDONLY);
 	if(ces.p_fd == -1){
 		err(EBADF, "open");
 		return -1;
@@ -70,7 +69,7 @@ int caesar_encrypt(char *argv[]){
 		close(ces.p_fd);
 		return -1;
 	}else{
-		printf("%s has %ld bits\n", argv[3], (long)ces.fileSize);
+		printf("%s has %ld bits\n", ptr_targetFile, (long)ces.fileSize);
 	}
 
 	/* read from fd */
@@ -98,16 +97,16 @@ int caesar_encrypt(char *argv[]){
 	}
 	
 	/* attempt to create outfile */
-	ces.c_fd = open(argv[4], O_EXCL | O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+	ces.c_fd = open(ptr_destinationFile, O_EXCL | O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 	if(ces.c_fd == -1){
-		printf("File already exists.\n Are you sure you want to overwrite %s? (666)\n(?)> ", argv[4]);
+		printf("File already exists.\n Are you sure you want to overwrite %s? (666)\n(?)> ", ptr_destinationFile);
 		scanf("%d", &security);
 		if(security != 666){
-			printf("Exiting without overwriting %s\n", argv[4]);
+			printf("Exiting without overwriting %s\n", ptr_destinationFile);
 			return -1;
 		}
 
-		ces.c_fd = open(argv[4], O_TRUNC | O_RDWR);
+		ces.c_fd = open(ptr_destinationFile, O_TRUNC | O_RDWR);
 		if(ces.c_fd == -1){
 			err(EBADF, "open");
 			return -1;
@@ -124,18 +123,18 @@ int caesar_encrypt(char *argv[]){
 	}else{
 		printf("Write Successful\n");
 	}
+
 	close(ces.c_fd);
-	
 	return 0;	
 }
 
-int caesar_decrypt(char *argv[]){
+int caesar_decrypt(char *ptr_targetFile, char *ptr_destinationFile){
 	struct Caesar_Data ces; /*caesar encrypt struct*/
         struct stat st;
         int security = 0;
 
         /* open ciphertext file for read */
-        ces.c_fd = open(argv[3], O_RDONLY);
+        ces.c_fd = open(ptr_targetFile, O_RDONLY);
         if(ces.c_fd == -1){
                 err(EBADF, "open");
                 return -1;
@@ -157,7 +156,7 @@ int caesar_decrypt(char *argv[]){
                 close(ces.c_fd);
                 return -1;
         }else{
-                printf("%s has %ld bits\n", argv[3], (long)ces.fileSize);
+                printf("%s has %ld bits\n", ptr_targetFile, (long)ces.fileSize);
         }
 
         /* read from fd */
@@ -185,16 +184,16 @@ int caesar_decrypt(char *argv[]){
         }
 
         /* attempt to create outfile */
-        ces.p_fd = open(argv[4], O_EXCL | O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+        ces.p_fd = open(ptr_destinationFile, O_EXCL | O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
         if(ces.p_fd == -1){
-                printf("File already exists.\n Are you sure you want to overwrite %s? (666)\n(?)> ", argv[4]);
+                printf("File already exists.\n Are you sure you want to overwrite %s? (666)\n(?)> ", ptr_destinationFile);
                 scanf("%d", &security);
                 if(security != 666){
-                        printf("Exiting without overwriting %s\n", argv[4]);
+                        printf("Exiting without overwriting %s\n", ptr_destinationFile);
                         return -1;
                 }
 
-                ces.p_fd = open(argv[4], O_TRUNC | O_RDWR);
+                ces.p_fd = open(ptr_destinationFile, O_TRUNC | O_RDWR);
                 if(ces.p_fd == -1){
                         err(EBADF, "open");
                         return -1;
@@ -217,7 +216,7 @@ int caesar_decrypt(char *argv[]){
 }
 
 /* You either understand or you don't */
-int caesar_crack(char *argv[]){
+int caesar_crack(char *ptr_targetFile){
 	printf("\n~Table Based Brute Force Attack~\n");
 
 	int done = 0;
@@ -227,7 +226,7 @@ int caesar_crack(char *argv[]){
         int security = 0;
 
         /* open ciphertext file for read */
-        ces.c_fd = open(argv[3], O_RDONLY);
+        ces.c_fd = open(ptr_targetFile, O_RDONLY);
         if(ces.c_fd == -1){
                 err(EBADF, "open");
                 return -1;
@@ -249,7 +248,7 @@ int caesar_crack(char *argv[]){
                 close(ces.c_fd);
                 return -1;
         }else{
-                printf("%s has %ld bits\n", argv[3], (long)ces.fileSize);
+                printf("%s has %ld bits\n", ptr_targetFile, (long)ces.fileSize);
         }
 
         /* read from fd */

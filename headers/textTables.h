@@ -46,7 +46,7 @@ char asciiTable[TABLESIZE] = {
 int getAsciiPosition(char buf){
 	for(int i=0; i<TABLESIZE; i++){
 		if(asciiTable[i] == '\0'){
-			printf("Tried to encrypt unsupported char: %c, returning 1", buf);
+			printf("Tried to encrypt unsupported char: [%c]\n returning 1\n", buf);
 			return 1;
 		}else if(buf == asciiTable[i]){
 			return i;
