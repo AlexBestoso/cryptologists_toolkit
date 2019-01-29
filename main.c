@@ -31,6 +31,8 @@ void printHeader(void){
 int main(int argc, char *argv[]){
 	Boolean fini = False;
 	Boolean optionPressed = False;
+	Boolean targetPtrUsed = False;
+	Boolean destinationPtrUsed = False;
 	int simp_input;
 	char cmd[CMD_MAX];
 	char *cmd_ptr;
@@ -42,8 +44,8 @@ int main(int argc, char *argv[]){
 	char *ptr_targetFile;
         char *ptr_destinationFile;
 
-        int targetFileCount = 0;
-        int destinationFileCount = 0;
+        int targetFileCount=0, oldTargetFileCount=0;
+        int destinationFileCount=0, oldDestinationFileCount=0;
 
 	/*
 	 * for the looks
@@ -52,7 +54,9 @@ int main(int argc, char *argv[]){
 	printHeader();	
 	
 	while(fini == False){	
-		printf("\n(CTK)> ");
+		if(optionPressed == False){	
+			printf("\n(CTK)> ");
+		}	
 		if(fgets(cmd, CMD_MAX, stdin) == NULL){
 			err(EIO, "fgets");
 			exit(EXIT_FAILURE);
@@ -71,7 +75,7 @@ int main(int argc, char *argv[]){
 		for(int i=0; i<cmd_size-1; i++){
 			*(cmd_ptr+i) = cmd[i];
 		}
-
+		
 		if(!strcmp(cmd_ptr, "exit\0")){
 			fini = True;
 
@@ -90,11 +94,24 @@ int main(int argc, char *argv[]){
 						targetFileCount++;
 					}
 				}
-				targetFile[targetFileCount] = '\0';
 
-				ptr_targetFile = malloc(targetFileCount*sizeof(char));
-				for(int i=0; i<targetFileCount-1; i++)
-					*(ptr_targetFile+i) = targetFile[i];
+				if(targetFileCount <= MAX_FILE_NAME && targetFileCount > 0)
+					targetFile[targetFileCount] = '\0';
+				
+
+				if(targetPtrUsed == False){
+					ptr_targetFile = malloc(targetFileCount*sizeof(char));
+					oldTargetFileCount = targetFileCount;
+					targetPtrUsed = True;
+
+				}else if(targetFileCount != oldTargetFileCount){
+					ptr_targetFile = realloc(ptr_targetFile, targetFileCount*sizeof(char));
+					oldTargetFileCount = targetFileCount;
+				}
+				
+				if(ptr_targetFile != NULL)
+					for(int i=0; i<targetFileCount-1; i++)
+						*(ptr_targetFile+i) = targetFile[i];
 			}
 
 			printf("Enter Destination File(type anything if you\'re cracking the cipher):\n");
@@ -111,27 +128,47 @@ int main(int argc, char *argv[]){
 						destinationFileCount++;
 					}
 				}
-				destinationFile[destinationFileCount] = '\0';
 
-				ptr_destinationFile = malloc(destinationFileCount*sizeof(char));
-				for(int i=0; i<destinationFileCount-1; i++)
-					*(ptr_destinationFile+i) = destinationFile[i];
+				if(destinationFileCount <= MAX_FILE_NAME && destinationFileCount > 0)
+					destinationFile[destinationFileCount] = '\0';
+				
+
+				if(destinationPtrUsed == False){
+					ptr_destinationFile = malloc(destinationFileCount*sizeof(char));
+					oldDestinationFileCount = destinationFileCount;
+					destinationPtrUsed = True;
+
+				}else if(destinationFileCount != oldDestinationFileCount){
+					ptr_destinationFile = realloc(ptr_destinationFile, destinationFileCount*sizeof(char));
+					oldDestinationFileCount = destinationFileCount;
+				}	
+				
+				if(ptr_destinationFile != NULL)
+					for(int i=0; i<destinationFileCount-1; i++)
+						*(ptr_destinationFile+i) = destinationFile[i];
 			}
 
 			printf("Are you,\n\t (1)Encrypting\n\t (2)Decrypting\n\t (3)Cracking\n(caesar)> ");
 			scanf("%d", &simp_input);
 			if(simp_input == 1){
-				caesar_encrypt(ptr_targetFile, ptr_destinationFile);
+				if(ptr_targetFile == NULL || ptr_destinationFile == NULL)
+					printf("Null pointer, not encrypting\n");
+				else
+					caesar_encrypt(ptr_targetFile, ptr_destinationFile);
 			}else if(simp_input == 2){
-				caesar_decrypt(ptr_targetFile, ptr_destinationFile);
+				if(ptr_targetFile == NULL || ptr_destinationFile == NULL)
+                                        printf("Null pointer, not decrypting\n");
+				else
+					caesar_decrypt(ptr_targetFile, ptr_destinationFile);
 			}else if(simp_input == 3){
-				caesar_crack(ptr_targetFile);
+				if(ptr_targetFile == NULL)
+					printf("Null pointer, not cracking\n");
+				else
+					caesar_crack(ptr_targetFile);
 			}else{
 				printf("invalid option\n");
 			}
 
-			ptr_targetFile = NULL;
-			ptr_destinationFile = NULL;
 			optionPressed = True;
 
 		}else if(!strcmp(cmd_ptr, "affine\0")){
@@ -149,12 +186,24 @@ int main(int argc, char *argv[]){
                                                 targetFileCount++;
                                         }
                                 }
-                                targetFile[targetFileCount] = '\0';
 
-                                ptr_targetFile = malloc(targetFileCount*sizeof(char));
-                                for(int i=0; i<targetFileCount-1; i++)
-                                        *(ptr_targetFile+i) = targetFile[i];
-                        }
+				if(targetFileCount <= MAX_FILE_NAME && targetFileCount > 0)
+	                                targetFile[targetFileCount] = '\0';
+				
+				if(targetPtrUsed == False){
+                                	ptr_targetFile = malloc(targetFileCount*sizeof(char));
+					oldTargetFileCount = targetFileCount;
+					targetPtrUsed = True;
+
+				}else if(targetFileCount != oldTargetFileCount){
+					ptr_targetFile = realloc(ptr_targetFile, targetFileCount*sizeof(char));
+					oldTargetFileCount = targetFileCount;
+				}
+				
+				if(ptr_targetFile != NULL)
+                                	for(int i=0; i<targetFileCount-1; i++)
+                                        	*(ptr_targetFile+i) = targetFile[i];
+			}
 
 			printf("Enter Destination File(type anything if you\'re cracking the cipher):\n");
                         printf("(affine)> ");
@@ -170,32 +219,52 @@ int main(int argc, char *argv[]){
                                                 destinationFileCount++;
                                         }
                                 }
-                                destinationFile[destinationFileCount] = '\0';
 
-                                ptr_destinationFile = malloc(destinationFileCount*sizeof(char));
-                                for(int i=0; i<destinationFileCount-1; i++)
-                                        *(ptr_destinationFile+i) = destinationFile[i];
+				if(destinationFileCount <= MAX_FILE_NAME && destinationFileCount > 0)
+	                                destinationFile[destinationFileCount] = '\0';
+				
+				if(destinationPtrUsed == False){
+	                                ptr_destinationFile = malloc(destinationFileCount*sizeof(char));
+					oldDestinationFileCount = destinationFileCount;
+					destinationPtrUsed = True;
+
+				}else if(destinationFileCount != oldDestinationFileCount){
+					ptr_destinationFile = realloc(ptr_destinationFile, destinationFileCount*sizeof(char));
+					oldDestinationFileCount = destinationFileCount;
+				}
+
+				if(ptr_destinationFile != NULL)
+                                	for(int i=0; i<destinationFileCount-1; i++)
+                                        	*(ptr_destinationFile+i) = destinationFile[i];
                         }
 
                         printf("Are you,\n\t (1)Encrypting\n\t (2)Decrypting\n\t (3)Cracking\n(affine)> ");
                         scanf("%d", &simp_input);
                         if(simp_input == 1){
-                                affine_encrypt(ptr_targetFile, ptr_destinationFile);
+				if(ptr_targetFile == NULL || ptr_destinationFile == NULL)
+					printf("Null pointer, not encrypting\n");
+				else
+                                	affine_encrypt(ptr_targetFile, ptr_destinationFile);
                         }else if(simp_input == 2){
-                                affine_decrypt(ptr_targetFile, ptr_destinationFile);
+				if(ptr_targetFile == NULL || ptr_destinationFile == NULL)
+                                        printf("Null pointer, not decrypting\n");
+				else
+                                	affine_decrypt(ptr_targetFile, ptr_destinationFile);
                         }else if(simp_input == 3){
-                                affine_crack(ptr_targetFile);
+				if(ptr_targetFile == NULL)
+                                        printf("Null pointer, not cracking\n");
+				else
+					affine_crack(ptr_targetFile);
                         }else{
                                 printf("invalid option\n");
                         }
 
-                        ptr_targetFile = NULL;
-                        ptr_destinationFile = NULL;
                         optionPressed = True;
 
 		}else if(!strcmp(cmd_ptr, "clear\0")){
 			system("clear");
 			printHeader();
+		
 		}else if(!strcmp(cmd_ptr, "help\0")){
 			printf("commands:\n");
 			printf("\texit\n");
@@ -203,6 +272,7 @@ int main(int argc, char *argv[]){
 			printf("\taffine\n");
 			printf("\tclear\n");
 			printf("\thelp\n");
+		
 		}else if(optionPressed == False){
 			printf("Invalid command, type help\n");
 			printf("%s\n", cmd_ptr);
@@ -214,5 +284,14 @@ int main(int argc, char *argv[]){
 			free(cmd_ptr);
 		cmd_ptr = NULL;
 	}
+
+	if(targetPtrUsed == True)
+		if(ptr_targetFile)
+			free(ptr_targetFile);
+	
+	if(destinationPtrUsed == True)
+		if(ptr_destinationFile)
+			free(ptr_destinationFile);
+
 	exit(EXIT_SUCCESS);
 }
