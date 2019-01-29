@@ -3,13 +3,13 @@
 Version 2
 
 This update made the tool nicer to look at. 
-There may stil be bugs that are unaccounted for, feel free to point them out if you find them.
+There may still be bugs that are unaccounted for, feel free to point them out if you find them.
 
-The next update after this will include the vigener cipher and letter frequency analysis. 
+The next update after this will include the vigenère cipher and letter frequency analysis.
 
 The goal of the project is to document all of the broken ciphers. 
 
-I don't recommend using these tools for your own cryptanalysis endevours as there already exist professional tools.
+I don't recommend using these tools for your own cryptanalysis endeavours as there already exist professional tools.
 
 Change List:
 	-Added header
