@@ -20,6 +20,5 @@ Bugs:
 	-After executing a cipher command, there is a double print of the input prompt.
 	-There may be memory leaks as this tool is still in its early stage. I don't reccomend using
 		this outside of a virtual machine.
-	-This has only been tested on Ubuntu. Any other Linux operating systems may have trouble 
-		compiling the code. I attempted to stay within the POSIX standards
-
+		
+Update ~ [Works outside of virtual machine]
