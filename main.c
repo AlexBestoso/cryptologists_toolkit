@@ -3,6 +3,7 @@
 #include "headers/textTables.h"
 #include "ciphers/caesar.h"
 #include "ciphers/affine.h"
+#include "crackers/LetterFreq.h"
 
 #define CMD_MAX 128
 #define MAX_FILE_NAME 128
@@ -57,6 +58,7 @@ int main(int argc, char *argv[]){
 		if(optionPressed == False){	
 			printf("\n(CTK)> ");
 		}	
+		memset(cmd, '\0', CMD_MAX);
 		if(fgets(cmd, CMD_MAX, stdin) == NULL){
 			err(EIO, "fgets");
 			exit(EXIT_FAILURE);
@@ -69,11 +71,16 @@ int main(int argc, char *argv[]){
 				cmd_size++;
 			}
 		}
-		cmd[cmd_size] = '\0';
+
+		if(cmd_size > 0 && cmd_size < CMD_MAX)
+			cmd[cmd_size] = '\0';
 
 		cmd_ptr = malloc(cmd_size*sizeof(char));
-		for(int i=0; i<cmd_size-1; i++){
-			*(cmd_ptr+i) = cmd[i];
+		memset(cmd_ptr, '\0', cmd_size);
+		if(cmd_ptr != NULL){
+			for(int i=0; i<cmd_size-1; i++){
+				*(cmd_ptr+i) = cmd[i];
+			}
 		}
 		
 		if(!strcmp(cmd_ptr, "exit\0")){
@@ -82,6 +89,7 @@ int main(int argc, char *argv[]){
 		}else if(!strcmp(cmd_ptr, "caesar\0")){
 			printf("Enter Target File:\n");
 			printf("(caesar)> ");
+			memset(targetFile, '\0', MAX_FILE_NAME);
 			if(fgets(targetFile, MAX_FILE_NAME, stdin) == NULL){
 				err(EIO, "fgets");
 			}else{
@@ -95,7 +103,7 @@ int main(int argc, char *argv[]){
 					}
 				}
 
-				if(targetFileCount <= MAX_FILE_NAME && targetFileCount > 0)
+				if(targetFileCount < MAX_FILE_NAME && targetFileCount > 0)
 					targetFile[targetFileCount] = '\0';
 				
 
@@ -108,7 +116,7 @@ int main(int argc, char *argv[]){
 					ptr_targetFile = realloc(ptr_targetFile, targetFileCount*sizeof(char));
 					oldTargetFileCount = targetFileCount;
 				}
-				
+				memset(ptr_targetFile, '\0', targetFileCount);
 				if(ptr_targetFile != NULL)
 					for(int i=0; i<targetFileCount-1; i++)
 						*(ptr_targetFile+i) = targetFile[i];
@@ -116,6 +124,7 @@ int main(int argc, char *argv[]){
 
 			printf("Enter Destination File(type anything if you\'re cracking the cipher):\n");
 			printf("(caesar)> ");
+			memset(destinationFile, '\0', MAX_FILE_NAME);
 			if(fgets(destinationFile, MAX_FILE_NAME, stdin) == NULL){
 				err(EIO, "fgets");
 			}else{
@@ -129,7 +138,7 @@ int main(int argc, char *argv[]){
 					}
 				}
 
-				if(destinationFileCount <= MAX_FILE_NAME && destinationFileCount > 0)
+				if(destinationFileCount < MAX_FILE_NAME && destinationFileCount > 0)
 					destinationFile[destinationFileCount] = '\0';
 				
 
@@ -143,6 +152,8 @@ int main(int argc, char *argv[]){
 					oldDestinationFileCount = destinationFileCount;
 				}	
 				
+				memset(ptr_destinationFile, '\0', destinationFileCount);
+
 				if(ptr_destinationFile != NULL)
 					for(int i=0; i<destinationFileCount-1; i++)
 						*(ptr_destinationFile+i) = destinationFile[i];
@@ -174,6 +185,7 @@ int main(int argc, char *argv[]){
 		}else if(!strcmp(cmd_ptr, "affine\0")){
 			printf("Enter Target File:\n");
                         printf("(affine)> ");
+			memset(targetFile, '\0', MAX_FILE_NAME);
                         if(fgets(targetFile, MAX_FILE_NAME, stdin) == NULL){
                                 err(EIO, "fgets");
                         }else{
@@ -187,7 +199,7 @@ int main(int argc, char *argv[]){
                                         }
                                 }
 
-				if(targetFileCount <= MAX_FILE_NAME && targetFileCount > 0)
+				if(targetFileCount < MAX_FILE_NAME && targetFileCount > 0)
 	                                targetFile[targetFileCount] = '\0';
 				
 				if(targetPtrUsed == False){
@@ -200,6 +212,8 @@ int main(int argc, char *argv[]){
 					oldTargetFileCount = targetFileCount;
 				}
 				
+				memset(ptr_targetFile, '\0', targetFileCount);
+
 				if(ptr_targetFile != NULL)
                                 	for(int i=0; i<targetFileCount-1; i++)
                                         	*(ptr_targetFile+i) = targetFile[i];
@@ -207,6 +221,7 @@ int main(int argc, char *argv[]){
 
 			printf("Enter Destination File(type anything if you\'re cracking the cipher):\n");
                         printf("(affine)> ");
+			memset(destinationFile, '\0', MAX_FILE_NAME);
                         if(fgets(destinationFile, MAX_FILE_NAME, stdin) == NULL){
                                 err(EIO, "fgets");
                         }else{
@@ -220,7 +235,7 @@ int main(int argc, char *argv[]){
                                         }
                                 }
 
-				if(destinationFileCount <= MAX_FILE_NAME && destinationFileCount > 0)
+				if(destinationFileCount < MAX_FILE_NAME && destinationFileCount > 0)
 	                                destinationFile[destinationFileCount] = '\0';
 				
 				if(destinationPtrUsed == False){
@@ -233,11 +248,13 @@ int main(int argc, char *argv[]){
 					oldDestinationFileCount = destinationFileCount;
 				}
 
+				memset(ptr_destinationFile, '\0', destinationFileCount);			
+	
 				if(ptr_destinationFile != NULL)
                                 	for(int i=0; i<destinationFileCount-1; i++)
                                         	*(ptr_destinationFile+i) = destinationFile[i];
-                        }
-
+                        
+			}
                         printf("Are you,\n\t (1)Encrypting\n\t (2)Decrypting\n\t (3)Cracking\n(affine)> ");
                         scanf("%d", &simp_input);
                         if(simp_input == 1){
@@ -261,6 +278,48 @@ int main(int argc, char *argv[]){
 
                         optionPressed = True;
 
+		}else if(!strcmp(cmd_ptr, "LFA\0")){
+			printf("Letter Frequency analysis\n\nEnter Target File\n");
+			printf("(LFA)> ");
+			memset(targetFile, '\0', MAX_FILE_NAME);
+			if(fgets(targetFile, MAX_FILE_NAME, stdin) == NULL){
+				err(EIO, "fgets");
+			}else{
+				printf("target file: %s\n", targetFile);
+				targetFileCount = 0;
+				for(int i=0; i<MAX_FILE_NAME; i++){
+					if(targetFile[i] == '\0'){
+						i=MAX_FILE_NAME+1;
+					}else{
+						targetFileCount++;
+					}
+				}
+
+				if(targetFileCount < MAX_FILE_NAME && targetFileCount > 0)
+					targetFile[targetFileCount] = '\0';
+
+
+				if(targetPtrUsed == False){
+					ptr_targetFile = malloc(targetFileCount*sizeof(char));
+					targetPtrUsed = True;
+					oldTargetFileCount = targetFileCount;
+
+				}else if(targetFileCount != oldTargetFileCount){
+					ptr_targetFile = realloc(ptr_targetFile, targetFileCount*sizeof(char));
+					oldTargetFileCount = targetFileCount;
+				}
+				
+				memset(ptr_targetFile, '\0', targetFileCount);
+
+				if(ptr_targetFile != NULL)
+					for(int i=0; i<targetFileCount-1; i++)
+						*(ptr_targetFile+i) = targetFile[i];
+				
+			}	
+
+			letterFrequencyAnalysis(ptr_targetFile);
+			//optionPressed = True;
+
 		}else if(!strcmp(cmd_ptr, "clear\0")){
 			system("clear");
 			printHeader();
@@ -270,6 +329,7 @@ int main(int argc, char *argv[]){
 			printf("\texit\n");
 			printf("\tcaesar\n");
 			printf("\taffine\n");
+			printf("\tLFA\n");
 			printf("\tclear\n");
 			printf("\thelp\n");
 		
